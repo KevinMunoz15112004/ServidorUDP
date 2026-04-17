@@ -15,10 +15,11 @@ public class Servidor {
         // modelo para operaciones
         Modelo modelo = new Modelo();
 
+        DatagramPacket entrada = null;
         // bucle infinito para que el servidor siempre esté escuchando
         while (true) {
             try {
-                DatagramPacket entrada = new DatagramPacket(bufferE, bufferE.length);
+                entrada = new DatagramPacket(bufferE, bufferE.length);
                 socket.receive(entrada);
 
                 // procesar
@@ -62,8 +63,18 @@ public class Servidor {
 
                 System.out.println("Procesada petición de " + entrada.getAddress() + ":" + entrada.getPort() + " -> " + recibido + " = " + respuesta);
             } catch (Exception e) {
+                String error = "Error: " + e.getMessage();
+
+                byte[] bufferS = error.getBytes();
+                DatagramPacket salida = new DatagramPacket(
+                        bufferS,
+                        bufferS.length,
+                        entrada.getAddress(),
+                        entrada.getPort()
+                );
+
+                socket.send(salida);
                 System.err.println("Error al procesar petición: " + e.getMessage());
-                e.printStackTrace();
             }
         }
     }
